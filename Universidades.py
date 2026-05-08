@@ -1,6 +1,6 @@
 import requests
 
-url = "https://universities.hipolabs.com/search?country=Brazil"
+url = "http://universities.hipolabs.com/search?country=Brazil"
     
 
 def requisicao_API():
@@ -102,15 +102,20 @@ def ordenar_dados(dados):
 
     print("\n===== UNIVERSIDADES ORDENADAS (A - Z) =====\n")
 
-    for u in ordenados[20]:
+    for u in ordenados:
         print(u["name"])
 
 def verificar_item(dados):
 
     nome = input("\nDigite o nome da universidade: ").lower()
 
-    #uso do any(verificaco eficiente)
-    existe = any(nome in u["name"].lower() for u in dados)
+    # verifica em vários campos (nome, país e estado)
+    existe = any(
+        nome in u.get("name", "").lower() or
+        nome in u.get("country", "").lower() or
+        nome in str(u.get("state-province", "")).lower()
+        for u in dados
+    )
 
     print("\n===== VERIFICAÇÃO =====\n")
     if existe:
