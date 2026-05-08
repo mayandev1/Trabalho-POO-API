@@ -2,11 +2,12 @@ import requests
 
 url = "https://universities.hipolabs.com/search?country=Brazil"
     
+
 def requisicao_API():
     # requisicao para a API
     try:
 
-        resposta = requests.get(url)
+        resposta = requests.get(url, timeout=10)
 
         if resposta.status_code == 200:
             return resposta.json()
@@ -74,9 +75,48 @@ def mostrar_detalhes(dados):
 
     print("Universidade não encontrada.")
 
-# def filtrar_dados(dados):
-# def ordenar_dados(): - Allana pode terminar 
-# def verificar_item():
+def filtrar_dados(dados):
+
+    termo = input("\nDigite o estado ou país: ").lower()
+
+    #lista filtrada usando compreensão de lista
+    filtrados = [
+        u for u in dados
+        if termo in u["name"].lower()
+        or termo in u["country"].lower()
+    ]
+    
+
+    print("\n===== RESULTADO DO FILTRO =====\n")
+    if filtrados:
+        for u in filtrados:
+            print(u["name"])
+    else:
+        print("Nenhuma universidade encontrada.")
+
+
+def ordenar_dados(dados):
+    #ordenação alfabetica pelo nome ( A - Z)
+    ordenados = sorted(dados, key=lambda u: u["name"].lower())
+
+
+    print("\n===== UNIVERSIDADES ORDENADAS (A - Z) =====\n")
+
+    for u in ordenados[20]:
+        print(u["name"])
+
+def verificar_item(dados):
+
+    nome = input("\nDigite o nome da universidade: ").lower()
+
+    #uso do any(verificaco eficiente)
+    existe = any(nome in u["name"].lower() for u in dados)
+
+    print("\n===== VERIFICAÇÃO =====\n")
+    if existe:
+        print("A universidade existe na base de dados. ")
+    else:
+        print("Universidade não encontrada.")
 
 def menu():
     # menu 
@@ -105,6 +145,15 @@ def menu():
 
                 case 3:
                     mostrar_detalhes(dados)
+
+                case 4:
+                    filtrar_dados(dados)
+
+                case 5:
+                    ordenar_dados(dados)
+
+                case 6:
+                    verificar_item(dados)
 
                 case 7:
                     print("Encerrando sistema...")
