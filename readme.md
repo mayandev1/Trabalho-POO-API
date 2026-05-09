@@ -27,9 +27,10 @@ A aplicação consome dados da API pública:
 | 📋 Listar universidades | ✅ Concluído |
 | 🔍 Buscar universidade | ✅ Concluído |
 | 🏛️ Mostrar detalhes | ✅ Concluído |
-| 🎯 Filtrar dados | 🚧 In Progress |
-| 🔤 Ordenar dados | 🚧 In Progress |
-| ✅ Verificar item | 🚧 In Progress |
+| 🎯 Filtrar dados | ✅ Concluído |
+| 🔤 Ordenar dados | ✅ Concluído |
+| ✅ Verificar item | ✅ Concluído |
+| 📊 Estatísticas | ✅ Concluído |
 | 🌐 Consumo de API | ✅ Concluído |
 | ⚠️ Tratamento de erros | ✅ Concluído |
 
@@ -47,7 +48,7 @@ A aplicação consome dados da API pública:
 ```bash
 universidades-api/
 │
-├── main.py
+├── Universidades.py
 └── README.md
 ````
 

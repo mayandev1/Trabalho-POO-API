@@ -1,10 +1,11 @@
 import requests
 
 url = "http://universities.hipolabs.com/search?country=Brazil"
-    
 
+
+# faz a requisição para a API
 def requisicao_API():
-    # requisicao para a API
+
     try:
 
         resposta = requests.get(url, timeout=10)
@@ -13,29 +14,38 @@ def requisicao_API():
             return resposta.json()
 
         else:
-            print("Erro ao acessar API.")
+            print(f"Erro ao acessar API. Status Code: {resposta.status_code}")
             return []
 
-    except requests.exceptions.RequestException:
-        print("Erro de conexão.")
+    except requests.exceptions.RequestException as erro:
+        print(f"Erro de conexão: {erro}")
         return []
 
+
+# lista universidades da API
 def listar_dados(dados):
-    
+
+    if not dados:
+        print("\nNenhum dado disponível.\n")
+        return
+
     print("\n===== LISTA DE UNIVERSIDADES =====\n")
 
-    # loop para listar as universidades presentes na API
     for i, universidade in enumerate(dados[:20], start=1):
 
         print(f"{i}. {universidade['name']}")
 
     print()
-    
 
-# função de busca
+
+# busca universidades pelo nome
 def buscar_item(dados):
-    
-    nome = input("\nDigite o nome da universidade: ").lower()
+
+    if not dados:
+        print("\nNenhum dado carregado da API.\n")
+        return
+
+    nome = input("\nDigite o nome da universidade: ").strip().lower()
 
     encontrados = [
         universidade for universidade in dados
@@ -53,10 +63,15 @@ def buscar_item(dados):
     else:
         print("Universidade não encontrada.")
 
-# função que lista todos os detalhes da universidade solicitada
+
+# mostra detalhes completos da universidade
 def mostrar_detalhes(dados):
-    
-    nome = input("\nDigite o nome da universidade: ").lower()
+
+    if not dados:
+        print("\nNenhum dado carregado da API.\n")
+        return
+
+    nome = input("\nDigite o nome da universidade: ").strip().lower()
 
     for universidade in dados:
 
@@ -69,77 +84,134 @@ def mostrar_detalhes(dados):
             print("Código:", universidade.get("alpha_two_code"))
             print("Domínio:", universidade.get("domains", ["Sem domínio"])[0])
             print("Site:", universidade.get("web_pages", ["Sem páginas web"])[0])
-            print("Estado:", universidade.get("state-province"))
+            print("Estado:", universidade.get("state-province", "Não informado"))
 
             return
 
     print("Universidade não encontrada.")
 
+
+# filtra universidades por nome, país ou estado
 def filtrar_dados(dados):
 
-    termo = input("\nDigite o estado ou país: ").lower()
+    if not dados:
+        print("\nNenhum dado carregado da API.\n")
+        return
 
-    #lista filtrada usando compreensão de lista
+    termo = input("\nDigite o nome, estado ou país: ").strip().lower()
+
     filtrados = [
         u for u in dados
-        if termo in u["name"].lower()
-        or termo in u["country"].lower()
+        if termo in u.get("name", "").lower()
+        or termo in u.get("country", "").lower()
+        or termo in str(u.get("state-province", "")).lower()
     ]
-    
 
     print("\n===== RESULTADO DO FILTRO =====\n")
+
     if filtrados:
+
         for u in filtrados:
             print(u["name"])
+
     else:
         print("Nenhuma universidade encontrada.")
 
 
+# ordena universidades em ordem alfabética
 def ordenar_dados(dados):
-    #ordenação alfabetica pelo nome ( A - Z)
-    ordenados = sorted(dados, key=lambda u: u["name"].lower())
 
+    if not dados:
+        print("\nNenhum dado carregado da API.\n")
+        return
+
+    ordenados = sorted(dados, key=lambda u: u["name"].lower())
 
     print("\n===== UNIVERSIDADES ORDENADAS (A - Z) =====\n")
 
-    for u in ordenados:
+    for u in ordenados[:30]:
         print(u["name"])
 
+
+# verifica se a universidade existe
 def verificar_item(dados):
 
-    nome = input("\nDigite o nome da universidade: ").lower()
+    if not dados:
+        print("\nNenhum dado carregado da API.\n")
+        return
 
-    # verifica em vários campos (nome, país e estado)
+    nome = input("\nDigite o nome da universidade: ").strip().lower()
+
     existe = any(
-        nome in u.get("name", "").lower() or
-        nome in u.get("country", "").lower() or
-        nome in str(u.get("state-province", "")).lower()
+        nome in u.get("name", "").lower()
+        or nome in u.get("country", "").lower()
+        or nome in str(u.get("state-province", "")).lower()
         for u in dados
     )
 
     print("\n===== VERIFICAÇÃO =====\n")
+
     if existe:
-        print("A universidade existe na base de dados. ")
+        print("A universidade existe na base de dados.")
+
     else:
         print("Universidade não encontrada.")
 
+
+# mostra estatísticas gerais da API
+def estatisticas(dados):
+
+    if not dados:
+        print("\nNenhum dado carregado da API.\n")
+        return
+
+    print("\n===== ESTATÍSTICAS =====\n")
+
+    # total de universidades
+    total = len(dados)
+
+    # universidades com estado definido
+    com_estado = sum(
+        1 for u in dados
+        if u.get("state-province")
+    )
+
+    # universidades sem estado definido
+    sem_estado = total - com_estado
+
+    # universidades com domínio .br
+    dominios_br = sum(
+        1 for u in dados
+        if ".br" in u.get("domains", [""])[0]
+    )
+
+    print(f"Total de universidades: {total}")
+    print(f"Com estado definido: {com_estado}")
+    print(f"Sem estado definido: {sem_estado}")
+    print(f"Domínios '.br': {dominios_br}")
+
+
+# menu principal do sistema
 def menu():
-    # menu 
-    
-    dados = requisicao_API() # recebe tudo da API
+
+    dados = requisicao_API()
+
     while True:
-        print("===== MENU API DE UNIVERSIDADES =====")
+
+        print("\n===== MENU API DE UNIVERSIDADES =====")
         print("1. Listar Dados")
         print("2. Buscar um Item")
         print("3. Detalhes")
         print("4. Filtrar Dados")
         print("5. Ordenar Dados")
         print("6. Verificar Item")
-        print("7. Sair")
-        
+        print("7. Estatísticas")
+        print("8. Sair")
+
         try:
+
             opcao = int(input("Sua opção: "))
-        
+
             match opcao:
 
                 case 1:
@@ -161,14 +233,17 @@ def menu():
                     verificar_item(dados)
 
                 case 7:
+                    estatisticas(dados)
+
+                case 8:
                     print("Encerrando sistema...")
                     break
 
                 case _:
                     print("Opção inválida.")
-                    
+
         except ValueError:
             print("Digite apenas números.")
-            
+
 
 menu()
